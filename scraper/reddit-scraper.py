@@ -1,13 +1,14 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[1]:
+# In[28]:
 
 
 import time
 import praw
 from datetime import datetime
 import threading
+import pandas as pd
 
 
 # In[2]:
@@ -59,7 +60,7 @@ def submissionstream(subreddits,submissions):#stream#
     return submissions
 
 
-# In[13]:
+# In[25]:
 
 
 def submissionsupdate(subreddits,submissions):#called at the end of the day#
@@ -69,24 +70,65 @@ def submissionsupdate(subreddits,submissions):#called at the end of the day#
         submission.commentforrest = post.comments
         for comment in submission.commentforrest:
             submission.comment.append(Comment(comment.body, comment.id))
-        print("update_done!")
-    return comments
+    print("update_done!")
+    return submissions
 
 
 # In[14]:
 
 
 def hot(subreddits,hots):
-    print("doing hots!")
     for sub in subreddits:
         hotposts = sub.hot(limit = 50)
         for submission in hotposts:
-            print(str(submission.subreddit.title) + "; " + submission.title+"; "+str(datetime.utcfromtimestamp(submission.created_utc))+";"+str(submission.score))
             dt = datetime.utcfromtimestamp(submission.created_utc)
             post = Post(submission.subreddit.title, submission.title, dt, submission.id)
             post.upvote_count = submission.score
             hots.append(post)
+        print(sub.title+" done!")
     return hots, datetime.utcnow()
+
+
+# In[48]:
+
+
+def csvwriter(submissions,hots):
+    stream_dic = {"subreddit":[],
+                  "Pid":[],
+                  "title":[],
+                  "upvote":[],
+                  "date":[]}
+    comment_dic = {"Cid":[],
+                   "Pid":[],
+                   "body":[]}
+    hot_dic = {"subreddit":[],
+               "Pid":[],
+               "title":[],
+               "upvote":[],
+               "date":[]}
+    for post in submissions:
+        stream_dic["subreddit"].append(post.subreddit)
+        stream_dic["Pid"].append(post.Pid)
+        stream_dic["title"].append(post.title)
+        stream_dic["upvote"].append(post.upvote_count)
+        stream_dic["date"].append(post.created_time)
+        for comment in post.comment:
+            comment_dic["Cid"].append(comment.Cid)
+            comment_dic["Pid"].append(post.Pid)
+            comment_dic["body"].append(comment.body)
+    for post in hots:
+        hot_dic["subreddit"].append(post.subreddit)
+        hot_dic["Pid"].append(post.Pid)
+        hot_dic["title"].append(post.title)
+        hot_dic["upvote"].append(post.upvote_count)
+        hot_dic["date"].append(post.created_time)
+    dt = str(datetime.utcnow()).split(" ")[0]
+    df_stream = pd.DataFrame(stream_dic)
+    df_comment = pd.DataFrame(comment_dic)
+    df_hot = pd.DataFrame(hot_dic)
+    df_stream.to_csv(str('stream'+dt+'.csv'))
+    df_comment.to_csv(str('comment'+dt+'.csv'))
+    df_hot.to_csv(str('hot'+dt+'.csv'))
 
 
 # In[15]:
@@ -102,32 +144,28 @@ submissions = []
 hots = []
 
 
-# In[ ]:
+# In[22]:
 
 
 submissionstream(subreddits,submissions)
 
 
-# In[ ]:
+# In[24]:
 
 
 submissionsupdate(subreddits,submissions)
 
 
-# In[ ]:
+# In[26]:
 
 
 hot(subreddits,hots)
 
 
-# In[19]:
+# In[49]:
 
 
-def csvwriter(submissions,hots):
-    pass
-
-def csvhelper(file):
-    pass
+csvwriter(submissions,hots)
 
 
 # In[ ]:

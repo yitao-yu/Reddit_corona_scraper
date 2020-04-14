@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[28]:
+# In[1]:
 
 
 import time
@@ -42,7 +42,20 @@ class Comment:
         self.body = body
 
 
-# In[12]:
+# In[5]:
+
+
+submissions = []
+hots = []
+
+
+# In[6]:
+
+
+subreddits = [reddit.subreddit('CoronavirusUS'),reddit.subreddit('CoronavirusUK'),reddit.subreddit('CoronavirusNewYork'),reddit.subreddit('CoronavirusCA'),reddit.subreddit('CoronavirusMichigan'),reddit.subreddit('CoronavirusPA'),reddit.subreddit('CoronavirusIllinois')]
+
+
+# In[7]:
 
 
 def submissionstream(subreddits,submissions):#stream#
@@ -60,7 +73,7 @@ def submissionstream(subreddits,submissions):#stream#
     return submissions
 
 
-# In[25]:
+# In[18]:
 
 
 def submissionsupdate(subreddits,submissions):#called at the end of the day#
@@ -69,12 +82,14 @@ def submissionsupdate(subreddits,submissions):#called at the end of the day#
         submission.upvote_count = post.score
         submission.commentforrest = post.comments
         for comment in submission.commentforrest:
+            if isinstance(comment, praw.models.MoreComments):
+                continue
             submission.comment.append(Comment(comment.body, comment.id))
     print("update_done!")
     return submissions
 
 
-# In[14]:
+# In[9]:
 
 
 def hot(subreddits,hots):
@@ -89,7 +104,7 @@ def hot(subreddits,hots):
     return hots, datetime.utcnow()
 
 
-# In[48]:
+# In[10]:
 
 
 def csvwriter(submissions,hots):
@@ -131,41 +146,35 @@ def csvwriter(submissions,hots):
     df_hot.to_csv(str('hot'+dt+'.csv'))
 
 
-# In[15]:
-
-
-subreddits = [reddit.subreddit('CoronavirusUS'),reddit.subreddit('CoronavirusUK'),reddit.subreddit('CoronavirusNewYork'),reddit.subreddit('CoronavirusCA'),reddit.subreddit('CoronavirusMichigan')]
-
-
 # In[16]:
-
-
-submissions = []
-hots = []
-
-
-# In[22]:
 
 
 submissionstream(subreddits,submissions)
 
 
-# In[24]:
+# In[ ]:
 
 
 submissionsupdate(subreddits,submissions)
 
 
-# In[26]:
+# In[24]:
 
 
 hot(subreddits,hots)
 
 
-# In[49]:
+# In[25]:
 
 
 csvwriter(submissions,hots)
+
+
+# In[14]:
+
+
+for i in submissions:
+    print(i)
 
 
 # In[ ]:

@@ -14,7 +14,7 @@ import pandas as pd
 # In[2]:
 
 
-reddit = praw.Reddit(client_id='P26uUpjfnflDVg', client_secret="L9oHqikaIVKSm-aXv-a7E-x8Yi8",
+reddit = praw.Reddit(client_id='***', client_secret="***",
                      password='password', user_agent='script by /u/CandlesTaken',
                      username='username')
 
